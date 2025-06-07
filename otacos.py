@@ -1,21 +1,31 @@
 import time
 import requests
 
-# Infos Telegram
-TELEGRAM_TOKEN = "7323886230:AAFMUv_GeOE6OBq41z806CgyE_8ReA9PZ08"  # Ton vrai token
-CHAT_ID = "5884292091"
+# 🔐 Infos Telegram
+TELEGRAM_TOKEN = "6993868325:AAHBdDwleZisWqu7TNFnd3b34l8jYy6P_Hk"
+TELEGRAM_IDS = [
+    "6658800633",
+    "5884292091",
+]
 
+# ✅ Références standards
 PAIEMENTS_STANDARD = {"cb", "cash", "apple pay", "google pay"}
 LIVRAISONS_STANDARD = {"clickandcollect", "ubereats", "deliveroo", "justeat"}
 
-def send_telegram_message(token, chat_id, text):
+# 📬 Fonction d'envoi à plusieurs utilisateurs
+def send_telegram_message(token, chat_ids, text):
     MAX_LEN = 4000
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    for i in range(0, len(text), MAX_LEN):
-        chunk = text[i:i+MAX_LEN]
-        payload = {'chat_id': chat_id, 'text': chunk}
-        requests.post(url, data=payload)
+    for chat_id in chat_ids:
+        for i in range(0, len(text), MAX_LEN):
+            chunk = text[i:i+MAX_LEN]
+            payload = {'chat_id': chat_id, 'text': chunk}
+            try:
+                requests.post(url, data=payload)
+            except Exception as e:
+                print(f"Erreur lors de l'envoi à {chat_id} : {e}")
 
+# 🔍 Analyse des restaurants O'Tacos
 def analyze_otacos():
     url = "https://api.flyx.cloud/otacos/ordering/api/store/getanonymous/fr-FR"
     try:
@@ -23,7 +33,7 @@ def analyze_otacos():
         response.raise_for_status()
         data = response.json()
     except Exception as e:
-        send_telegram_message(TELEGRAM_TOKEN, CHAT_ID, f"⚠️ Erreur fetch O'Tacos : {e}")
+        send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_IDS, f"⚠️ Erreur fetch O'Tacos : {e}")
         return
 
     messages = []
@@ -47,12 +57,20 @@ def analyze_otacos():
             messages.append(msg)
 
     if anomalies_found:
-        send_telegram_message(TELEGRAM_TOKEN, CHAT_ID, "⚠️ Anomalies détectées dans les restaurants O’Tacos :\n\n" + "\n".join(messages))
+        send_telegram_message(
+            TELEGRAM_TOKEN,
+            TELEGRAM_IDS,
+            "⚠️ Anomalies détectées dans les restaurants O’Tacos :\n\n" + "\n".join(messages)
+        )
     else:
-        send_telegram_message(TELEGRAM_TOKEN, CHAT_ID, "✅ Aucune anomalie détectée dans les restaurants O’Tacos.")
+        send_telegram_message(
+            TELEGRAM_TOKEN,
+            TELEGRAM_IDS,
+            "✅ Aucune anomalie détectée dans les restaurants O’Tacos."
+        )
 
-# 🚨 Boucle infinie : exécution toutes les 3600 secondes
+# 🔁 Exécution toutes les heures
 if __name__ == "__main__":
     while True:
         analyze_otacos()
-        time.sleep(3600)
+        time.sleep(3600)  # Pause 1h
