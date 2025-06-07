@@ -55,4 +55,4 @@ def analyze_otacos():
 if __name__ == "__main__":
     while True:
         analyze_otacos()
-        time.sleep(3600)
+        time.sleep(10)
