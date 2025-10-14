@@ -2,10 +2,10 @@ import time
 import requests
 
 # 🔐 Infos Telegram
-TELEGRAM_TOKEN = "6993868325:AAHBdDwleZisWqu7TNFnd3b34l8jYy6P_Hk"
+TELEGRAM_TOKEN = ""
 TELEGRAM_IDS = [
-    "6658800633",
-    "5884292091",
+    "",
+    "",
 ]
 
 # ✅ Références standards
